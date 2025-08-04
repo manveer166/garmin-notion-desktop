@@ -1,0 +1,8 @@
+from garminconnect import Garmin
+
+email = "manveer166@gmail.com"
+password = "137Leami!"
+
+client = Garmin(email, password)
+client.login()
+print("✅ Garmin login successful!")
