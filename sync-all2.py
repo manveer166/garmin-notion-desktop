@@ -18,6 +18,7 @@ def run(script):
 if __name__ == "__main__":
     for s in [
         "garmin-activities.py",
+        "garmin-activities2.py",
         "personal-records.py",
         "sleep-data.py",
         "daily-steps.py",
