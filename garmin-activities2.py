@@ -108,6 +108,7 @@ def upsert_activity(client: Client, database_id: str, a: dict):
     cals = round(a.get("calories") or 0)
     pace_txt = format_pace(a.get("averageSpeed"))
 
+
     # Does it already exist?
     existing = activity_exists(client, database_id, start_gmt or date_for_notion, name)
 
@@ -115,6 +116,7 @@ def upsert_activity(client: Client, database_id: str, a: dict):
     props = {
         "Date": {"date": {"start": date_for_notion}},
         #"Start": {"rich_text": [{"text": {"content": start_local_readable}}]},
+   
         "Activity Name": {"title": [{"text": {"content": name}}]},
         # Try select if your DB uses a select property; otherwise Notion API will accept rich_text fallback
         "Activity Type": {"select": {"name": type_key}},
@@ -122,6 +124,8 @@ def upsert_activity(client: Client, database_id: str, a: dict):
         "Duration (min)": {"number": dur_min},
         "Calories": {"number": cals},
         "Avg Pace": {"rich_text": [{"text": {"content": pace_txt}}]},
+        "Subactivity Type": {"select": {"name": type_key}},
+
     }
 
     if existing:

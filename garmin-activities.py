@@ -18,7 +18,8 @@ NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 NOTION_DB_ID = os.getenv("NOTION_DB_ID")
 TOKEN_STORE = os.path.expanduser(os.getenv("GARMIN_TOKEN_STORE", "~/.garmin_tokens"))
 
-LOCAL_TZ = pytz.timezone("America/Toronto")
+LOCAL_TZ = pytz.timezone("Europe/London")
+
 
 # -----------------------------
 # Ensure tokens exist (bootstrap via garth if missing)
