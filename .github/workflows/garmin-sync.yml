@@ -2,13 +2,14 @@ name: Garmin to Notion Sync
 
 on:
   schedule:
-    - cron: '0 5 * * *'      # 6:00am UK time (5am UTC)
-    - cron: '58 22 * * *'    # 11:59pm UK time (10:58pm UTC)
+    - cron: '0 5 * * *'      # 6:00am UK time (5am UK winter = 5am UTC)
+    - cron: '58 22 * * *'    # 11:58pm UK time (10:58pm UTC)
   workflow_dispatch:         # allows manual trigger
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -18,6 +19,20 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Restore Garmin tokens
+        # Requires two repo secrets:
+        #   OAUTH1_TOKEN_B64  -> base64 of ~/.garmin_tokens/oauth1_token.json
+        #   OAUTH2_TOKEN_B64  -> base64 of ~/.garmin_tokens/oauth2_token.json
+        run: |
+          mkdir -p ~/.garmin_tokens
+          echo "$OAUTH1_TOKEN_B64" | base64 -d > ~/.garmin_tokens/oauth1_token.json
+          echo "$OAUTH2_TOKEN_B64" | base64 -d > ~/.garmin_tokens/oauth2_token.json
+          # Optional: show file list (not contents) for debugging
+          ls -la ~/.garmin_tokens
+        env:
+          OAUTH1_TOKEN_B64: ${{ secrets.OAUTH1_TOKEN_B64 }}
+          OAUTH2_TOKEN_B64: ${{ secrets.OAUTH2_TOKEN_B64 }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -25,12 +40,17 @@ jobs:
 
       - name: Run sync-all2
         env:
+          # Notion
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
           NOTION_PR_DB_ID: ${{ secrets.NOTION_PR_DB_ID }}
           NOTION_STEPS_DB_ID: ${{ secrets.NOTION_STEPS_DB_ID }}
           NOTION_SLEEP_DB_ID: ${{ secrets.NOTION_SLEEP_DB_ID }}
           NOTION_HEALTH_DB_ID: ${{ secrets.NOTION_HEALTH_DB_ID }}
+          # Garmin
+          # If your script still supports email/password as a fallback, keep these.
+          # Otherwise you can remove them since tokens are restored above.
           GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
           GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
-        run: python sync-all2.py
+        run: |
+          python sync-all2.py
