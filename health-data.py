@@ -1,6 +1,9 @@
+from datetime import datetime
+
+
 def fetch_today_health(garmin, date_str):
     """
-    Collect weight, BMI, and resting HR for a given YYYY-MM-DD.
+    Collect weight, BMI, and resting HR for a given YYYY‑MM‑DD.
     Works across garminconnect versions by trying multiple endpoints.
     """
     weight = None
@@ -61,12 +64,23 @@ def fetch_today_health(garmin, date_str):
         except Exception as e:
             print(f"Note: couldn't read body composition via {method} for {date_str}: {e}")
 
+    # Always return a dict; include no_data flag and a time string
+    time_str = datetime.now().strftime("%H:%M")
     if weight is None and bmi is None and rhr is None:
-        return None
+        return {
+            "calendarDate": date_from_data or date_str,
+            "weight": 0.0,
+            "restingHeartRate": 0,
+            "bmi": 0.0,
+            "no_data": True,
+            "time": time_str,
+        }
 
     return {
         "calendarDate": date_from_data or date_str,
         "weight": float(weight) if weight is not None else 0.0,
         "restingHeartRate": int(rhr) if rhr is not None else 0,
         "bmi": float(bmi) if bmi is not None else 0.0,
+        "no_data": False,
+        "time": time_str,
     }
